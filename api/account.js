@@ -19,6 +19,67 @@ export async function fetchOrderList(chain, walletAddress, limit) {
     }
 }
 
+// todo потестить какой статус нужно кидать, чтобы получить нфт не в продаже
+const status = "";
+/**
+ *
+ * @returns {Array<Asset>|undefined}
+ */
+export async function fetchAssetList(walletAddress, chain, collection_slug, limit = 1000) {
+    try {
+        const response = await axios.get('https://api.element.market/openapi/v1/account/assetList', {
+            headers: {
+                'accept': 'application/json'
+            },
+            params: {
+                chain: chain,
+                wallet_address: walletAddress,
+                collection_slug: collection_slug,
+                status: status,
+                limit: limit
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching asset list:', error);
+        throw error;
+    }
+}
+
+class Asset {
+    constructor(asset) {
+        this.chain = asset.chain;
+        this.chainId = asset.chainId;
+        this.contractAddress = asset.contractAddress;
+        this.tokenId = asset.tokenId;
+        this.tokenType = asset.tokenType;
+        this.name = asset.name;
+        this.imagePreviewUrl = asset.imagePreviewUrl;
+        this.animationUrl = asset.animationUrl;
+        this.collection = new Collection(asset.collection);
+    }
+}
+
+class Collection {
+    constructor(collection) {
+        this.name = collection.name;
+        this.slug = collection.slug;
+        this.royalty = collection.royalty;
+        this.imageUrl = collection.imageUrl;
+        this.isVerified = collection.isVerified;
+    }
+}
+
+/**
+ *
+ * @param response
+ * @returns {Array<Asset>|undefined}
+ */
+function parseAssetListResponse(response) {
+    return  response.data.assetList.map(assetData => new Asset(assetData.asset));
+}
+
+
 /**
  *
  * @returns {Array<AccountOrder>|undefined}

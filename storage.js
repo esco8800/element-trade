@@ -13,5 +13,5 @@ export function remove(key) {
 }
 
 export function has(key) {
-    sharedData.has(key);
+    return sharedData.has(key);
 }
